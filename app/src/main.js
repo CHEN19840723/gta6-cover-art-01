@@ -1,0 +1,33 @@
+import {SIZES,LAYOUTS,GRADES,drawCover,panelsFor} from './cover.js';
+const $=id=>document.getElementById(id),canvas=$('cover');
+const state={title:'AFTER DARK',subtitle:'THE CITY NEVER FORGETS',layout:'story',grade:'vice',size:'1080x1080',illustrated:true,grain:true};
+let slots=[],selected=0,drag=null;
+export function loadImage(src){return new Promise((resolve,reject)=>{const img=new Image();img.onload=()=>resolve(img);img.onerror=reject;img.src=src;});}
+function panelCount(){return panelsFor(state.layout,1080,state.size==='1080x1350'?1350:1080).length;}
+function redraw(){const [w,h]=SIZES[state.size];canvas.width=w;canvas.height=h;drawCover(canvas,state,slots);$('dimensions').textContent=`${w} × ${h}`;$('exportSize').textContent=`${w} × ${h}`;const r=canvas.getBoundingClientRect();canvas.style.aspectRatio=`${w}/${h}`;canvas.style.maxWidth=state.size==='1920x1080'?'100%':'min(100%, 660px)';}
+function updatePanel(){const count=panelCount();selected=Math.min(selected,count-1);$('panelName').textContent=`PANEL ${String(selected+1).padStart(2,'0')} SELECTED`;$('zoom').value=Math.round((slots[selected]?.zoom||1)*100);$('zoomValue').textContent=$('zoom').value+'%';document.querySelectorAll('.panel').forEach((x,i)=>x.classList.toggle('active',i===selected));}
+function buildControls(){
+ $('layouts').innerHTML=LAYOUTS.map(l=>`<button class="layout ${l.id===state.layout?'active':''}" data-layout="${l.id}" aria-label="${l.name}"><span class="layout-art">${'<i></i>'.repeat(l.id==='quad'?4:l.id==='story'?3:l.id==='trio'?3:2)}</span><small>${l.name}</small></button>`).join('');
+ $('grades').innerHTML=GRADES.map(g=>`<button class="grade ${g.id===state.grade?'active':''}" data-grade="${g.id}"><i></i>${g.name}</button>`).join('');
+ document.querySelectorAll('[data-layout]').forEach(b=>b.onclick=()=>{state.layout=b.dataset.layout;document.querySelectorAll('.layout').forEach(x=>x.classList.toggle('active',x===b));buildPanels();redraw();});
+ document.querySelectorAll('[data-grade]').forEach(b=>b.onclick=()=>{state.grade=b.dataset.grade;document.querySelectorAll('.grade').forEach(x=>x.classList.toggle('active',x===b));redraw();});
+}
+function buildPanels(){const n=panelCount();$('panelList').innerHTML=Array.from({length:n},(_,i)=>{const s=slots[i];return `<button class="panel ${i===selected?'active':''}" data-panel="${i}"><img class="thumb" alt="" src="${s?.img.src||'data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%2240%22 height=%2245%22%3E%3Crect width=%2240%22 height=%2245%22 fill=%22%23ba8ca9%22/%3E%3C/svg%3E'}"><span><b>PANEL ${String(i+1).padStart(2,'0')}</b><small>${s?'PHOTO LOADED':'ADD A PHOTO'}</small></span><span class="replace">${s?'↻':'＋'}</span></button>`}).join('');document.querySelectorAll('[data-panel]').forEach(b=>b.onclick=()=>{selected=Number(b.dataset.panel);updatePanel();if(!slots[selected]){pending=selected;$('file').click();}});}
+async function addFiles(files,start=0){for(const file of files){if(!file.type.startsWith('image/'))continue;const img=await loadImage(URL.createObjectURL(file));slots[start]={img,zoom:1,x:0,y:0};start=(start+1)%panelCount();}selected=Math.max(0,start-1);buildPanels();updatePanel();redraw();$('status').textContent='PHOTOS LOADED · READY TO EXPORT';}
+let pending=0;
+$('title').oninput=e=>{state.title=e.target.value;redraw()};$('subtitle').oninput=e=>{state.subtitle=e.target.value;redraw()};
+['illustrated','grain'].forEach(id=>$(id).onchange=e=>{state[id]=e.target.checked;redraw()});
+document.querySelectorAll('[data-size]').forEach(b=>b.onclick=()=>{state.size=b.dataset.size;document.querySelectorAll('[data-size]').forEach(x=>x.classList.toggle('active',x===b));buildPanels();updatePanel();redraw();});
+$('addPhoto').onclick=()=>{pending=slots.length%panelCount();$('file').click()};$('file').onchange=async e=>{await addFiles([...e.target.files],pending);e.target.value=''};
+$('zoom').oninput=e=>{if(!slots[selected])return;slots[selected].zoom=Number(e.target.value)/100;$('zoomValue').textContent=e.target.value+'%';redraw()};
+$('resetPanel').onclick=()=>{if(slots[selected])slots[selected]={...slots[selected],zoom:1,x:0,y:0};updatePanel();redraw()};
+function pointerPosition(e){const r=canvas.getBoundingClientRect();return{x:(e.clientX-r.left)/r.width*canvas.width,y:(e.clientY-r.top)/r.height*canvas.height};}
+canvas.onpointerdown=e=>{const p=pointerPosition(e),rects=panelsFor(state.layout,canvas.width,canvas.height);selected=rects.findIndex(r=>p.x>=r.x&&p.x<=r.x+r.w&&p.y>=r.y&&p.y<=r.y+r.h);if(selected<0||!slots[selected])return;drag={p,x:slots[selected].x,y:slots[selected].y};canvas.setPointerCapture(e.pointerId);updatePanel();};
+canvas.onpointermove=e=>{if(!drag)return;const p=pointerPosition(e),r=panelsFor(state.layout,canvas.width,canvas.height)[selected];slots[selected].x=Math.max(-1,Math.min(1,drag.x+(p.x-drag.p.x)/r.w));slots[selected].y=Math.max(-1,Math.min(1,drag.y+(p.y-drag.p.y)/r.h));redraw()};canvas.onpointerup=()=>drag=null;
+canvas.onwheel=e=>{if(!slots[selected])return;e.preventDefault();slots[selected].zoom=Math.max(1,Math.min(3,slots[selected].zoom+(e.deltaY<0?.1:-.1)));updatePanel();redraw()},{passive:false};
+async function exportPNG(){const out=document.createElement('canvas'),[w,h]=SIZES[state.size];out.width=w;out.height=h;drawCover(out,state,slots);$('status').textContent='RENDERING FULL-RES PNG…';out.toBlob(blob=>{if(!blob){$('status').textContent='EXPORT FAILED — PLEASE TRY AGAIN';return;}const url=URL.createObjectURL(blob),a=document.createElement('a');a.href=url;a.download=`vice-cover-${w}x${h}.png`;a.click();setTimeout(()=>URL.revokeObjectURL(url),2000);$('status').textContent=`SAVED VICE-COVER-${w}X${h}.PNG`;window.__lastExport={width:w,height:h,bytes:blob.size};},'image/png');}
+$('export').onclick=exportPNG;$('exportTop').onclick=exportPNG;
+buildControls();buildPanels();redraw();
+const shot=new URLSearchParams(location.search).get('shot');
+if(shot){const q=new URLSearchParams(location.search);state.layout=q.get('layout')||'story';state.size=q.get('size')||'1080x1080';state.title=q.get('title')||'AFTER DARK';$('title').value=state.title;if(q.get('grade'))state.grade=q.get('grade');const names=(q.get('photos')||'boulevard,pier').split(',');for(let i=0;i<names.length;i++)slots[i]={img:await loadImage(`samples/${names[i]}.jpg`),zoom:1,x:0,y:0};if(shot==='cover'){document.body.classList.add('shot-cover');document.body.appendChild(canvas);}buildControls();document.querySelectorAll('[data-size]').forEach(x=>x.classList.toggle('active',x.dataset.size===state.size));buildPanels();updatePanel();redraw();requestAnimationFrame(()=>requestAnimationFrame(()=>window.__shotReady=true));}
+window.__vice={state,slots,redraw,exportPNG,addFiles};
