@@ -1,48 +1,56 @@
 <!doctype html>
 <html lang="en">
 <head>
-  <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="An offline, original multi-panel cover maker.">
   <title>VICE — Cover Studio</title>
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
-<header class="topbar"><a class="brand" href="./"><span>VICE</span><b>COVER STUDIO</b></a><div class="edition"><i></i> INDEPENDENT COVER LAB <span>VOL. 06</span></div><button id="exportTop" class="primary">EXPORT COVER <span>↗</span></button></header>
-<main>
-  <aside class="sidebar left">
-    <div class="section-title"><span>01</span> YOUR STORY</div>
-    <label class="field">TITLE <input id="title" value="AFTER DARK" maxlength="22" spellcheck="false"></label>
-    <label class="field">SUBTITLE <input id="subtitle" value="THE CITY NEVER FORGETS" maxlength="38" spellcheck="false"></label>
-    <div class="section-title"><span>02</span> COMPOSITION</div>
-    <div id="layouts" class="layouts" aria-label="Layout selection"></div>
-    <div class="section-title"><span>03</span> COLOUR GRADE</div>
-    <div id="grades" class="grades"></div>
-    <div class="section-title"><span>04</span> FINISHING</div>
-    <label class="switch">Illustrated finish <input id="illustrated" type="checkbox" checked><b></b></label>
-    <label class="switch">Print grain <input id="grain" type="checkbox" checked><b></b></label>
-    <div class="tip"><b>MAKE IT YOURS.</b><br>Your photos stay on this device. No uploads. No official game artwork.</div>
-  </aside>
-  <section class="workspace">
-    <div class="workspace-head"><div><span class="eyebrow">THE COVER</span><h1>Make your own headline.</h1></div><div class="size-tabs" id="sizes"><button data-size="1080x1080" class="active">1:1</button><button data-size="1080x1350">4:5</button><button data-size="1920x1080">16:9</button></div></div>
-    <div class="canvas-shell" id="canvasShell"><canvas id="cover" width="1080" height="1080"></canvas><div class="canvas-hint">DRAG PHOTOS TO REPOSITION · SCROLL TO ZOOM</div></div>
-    <div class="strip"><span id="panelName">PANEL 01 SELECTED</span><span>PNG · HIGH RESOLUTION</span><span id="dimensions">1080 × 1080</span></div>
-  </section>
-  <aside class="sidebar right">
-    <div class="section-title"><span>05</span> PHOTO PANELS</div>
-    <p class="instruction">One photo, or a different story in every frame.</p>
-    <div id="panelList" class="panel-list"></div>
-    <button id="addPhoto" class="upload">＋ ADD PHOTOS <small>JPG, PNG OR WEBP</small></button>
-    <input id="file" type="file" accept="image/jpeg,image/png,image/webp" multiple hidden>
-    <div class="section-title"><span>06</span> SELECTED PANEL</div>
-    <div class="control-label"><label for="zoom">Zoom</label><output id="zoomValue">100%</output></div>
-    <input id="zoom" type="range" min="100" max="300" value="100">
-    <button id="resetPanel" class="secondary">↺ RESET PANEL</button>
-    <div class="section-title"><span>07</span> READY TO SHARE</div>
-    <p class="instruction">Your cover is rendered at full size, not captured from the preview.</p>
-    <button id="export" class="primary export">EXPORT PNG <span id="exportSize">1080 × 1080</span></button>
-    <div id="status" role="status">ALL CHANGES SAVED LOCALLY</div>
-  </aside>
-</main>
-<footer><span>ORIGINAL ARTWORK · ORIGINAL TYPE · YOUR PHOTOS</span><span>VICE COVER STUDIO © 2026</span></footer>
-<script type="module" src="src/main.js"></script>
+  <header class="masthead">
+    <a class="brand" href="./" aria-label="Vice Cover Studio home"><strong>VICE<span>®</span></strong><span>COVER<br>STUDIO</span></a>
+    <div class="issue"><i></i> INDEPENDENT COVER LAB <span>ISSUE Nº 06 / 2026</span></div>
+    <button class="button ink" id="exportTop">EXPORT COVER <span>↗</span></button>
+  </header>
+
+  <main class="studio">
+    <aside class="tools left-tools">
+      <div class="section-heading"><span>01</span><h2>YOUR HEADLINE</h2><i></i></div>
+      <label class="text-field"><span>MAIN TITLE</span><input id="title" value="AFTER DARK" maxlength="24" spellcheck="false"></label>
+      <label class="text-field"><span>SUBTITLE</span><input id="subtitle" value="THE CITY NEVER FORGETS" maxlength="42" spellcheck="false"></label>
+      <div class="section-heading"><span>02</span><h2>COMPOSITION</h2><i></i></div>
+      <div class="layout-grid" id="layouts"></div>
+      <div class="section-heading"><span>03</span><h2>COLOUR STORY</h2><i></i></div>
+      <div class="grade-grid" id="grades"></div>
+      <div class="section-heading"><span>04</span><h2>FINISHING TOUCHES</h2><i></i></div>
+      <label class="toggle"><span>Illustrated finish<small>Graphic colour &amp; crisp contrast</small></span><input type="checkbox" id="illustrated" checked><b></b></label>
+      <label class="toggle"><span>Print texture<small>A little analog imperfection</small></span><input type="checkbox" id="grain" checked><b></b></label>
+      <div class="privacy"><span>LOCAL BY DESIGN</span><p>Your photos never leave this device. No accounts. No uploads. Just your story.</p></div>
+    </aside>
+
+    <section class="stage">
+      <div class="stage-heading"><div><span class="kicker">THE COVER DESK</span><h1>Your city. Your headline.</h1></div><div class="sizes" id="sizes"><button data-size="1080x1080" class="selected">1:1<span>SQUARE</span></button><button data-size="1080x1350">4:5<span>PORTRAIT</span></button><button data-size="1920x1080">16:9<span>WIDE</span></button></div></div>
+      <div class="canvas-wrap" id="canvasWrap"><canvas id="cover" width="1080" height="1080" aria-label="Interactive cover preview"></canvas><div class="canvas-note"><span>↔</span> DRAG TO REPOSITION <b>·</b> SCROLL TO ZOOM</div></div>
+      <div class="stage-meta"><span><i></i><b id="panelName">PANEL 01</b> SELECTED</span><span>RGB / PNG <b id="dimensions">1080 × 1080 PX</b></span></div>
+      <div class="desk-caption"><span>MAKE SOMETHING<br>WORTH FRAMING.</span><p>Mix your favourite frames. Find your colours.<br>Put your own words on the cover.</p><div class="stamp">ORIGINAL<br><b>STORIES</b><small>MADE BY YOU</small></div></div>
+    </section>
+
+    <aside class="tools right-tools">
+      <div class="section-heading"><span>05</span><h2>PHOTO PANELS</h2><i></i></div>
+      <p class="help">One photo across the story, or a different moment in every frame.</p>
+      <div class="panel-list" id="panelList"></div>
+      <button class="add-button" id="addPhoto"><span>＋</span><b>ADD YOUR PHOTOS</b><small>JPG, PNG OR WEBP</small></button>
+      <input id="file" type="file" accept="image/jpeg,image/png,image/webp" multiple hidden>
+      <div class="section-heading"><span>06</span><h2>FRAME IT YOUR WAY</h2><i></i></div>
+      <div class="slider-label"><label for="zoom">PHOTO SCALE</label><output id="zoomValue">100%</output></div>
+      <input id="zoom" class="range" type="range" min="100" max="300" value="100">
+      <div class="position-label">POSITION <span>DRAG IN PREVIEW</span></div>
+      <div class="position-control"><div class="nudge-grid"><button data-nudge="up" aria-label="Move photo up">↑</button><button data-nudge="left" aria-label="Move photo left">←</button><button data-nudge="reset" aria-label="Center photo">•</button><button data-nudge="right" aria-label="Move photo right">→</button><button data-nudge="down" aria-label="Move photo down">↓</button></div><button class="reset" id="resetPanel">↺<span>RESET<br>THIS PANEL</span></button></div>
+      <div class="export-block"><div class="section-heading"><span>07</span><h2>READY FOR THE WORLD</h2><i></i></div><p class="help">Full-resolution artwork. Not a screenshot.</p><button class="button ink export" id="export">EXPORT PNG <span id="exportSize">1080 × 1080</span></button><div class="status" id="status" role="status"><i></i> SAVED IN THIS SESSION</div></div>
+    </aside>
+  </main>
+  <footer><span>NO GAME ASSETS. ALL ORIGINAL ART DIRECTION.</span><span>VICE COVER STUDIO <b>®</b> 2026</span></footer>
+  <script type="module" src="src/main.js"></script>
 </body>
 </html>
