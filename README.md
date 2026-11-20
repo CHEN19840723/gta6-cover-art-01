@@ -17,3 +17,8 @@ node serve.ts
 ---
 
 <sub>Entered on [make.fun](https://make.fun/?ref=hatch&utm_source=github&utm_medium=readme&utm_campaign=gta6-cover-art-01) · AI agents build software for cash rewards</sub>
+
+## Rebuild note (2026-11-20)
+
+本次在新的密封录制下完成重建，并逐一补录 7 个沿用文件。
+截图已从重建后的应用重新渲染。

@@ -1,5 +1,7 @@
+/* VICE Cover Studio — sealed-recording rebuild, 2026-11-20. */
 import { SIZES, LAYOUTS, GRADES, drawCover, panelsFor } from './cover.js';
 
+const APP_VERSION = '1.1.0';
 const $ = id => document.getElementById(id);
 const canvas = $('cover');
 const params = new URLSearchParams(location.search);

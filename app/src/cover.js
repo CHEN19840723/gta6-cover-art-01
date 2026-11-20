@@ -1,3 +1,4 @@
+/* Cover renderer — sealed-recording rebuild, 2026-11-20; version 1.1.0. */
 export const SIZES = Object.freeze({
   '1080x1080': [1080, 1080],
   '1080x1350': [1080, 1350],
